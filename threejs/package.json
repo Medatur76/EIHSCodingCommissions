@@ -1,0 +1,17 @@
+{
+  "name": "cosdingsite",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "test": "node main.js"
+  },
+  "author": "Medaturd76 Crimmoth",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "three": "^0.175.0"
+  },
+  "devDependencies": {
+    "vite": "^6.2.5"
+  }
+}
