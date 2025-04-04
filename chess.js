@@ -23,10 +23,22 @@ const conversion = {
     "f": 5,
     "g": 6,
     "h": 7
+};
+
+const piece_to_int = {
+    "b": 0,
+    "w": 1,
+    "p": 0,
+    "r": 1,
+    "n": 2,
+    "b": 3,
+    "k": 4,
+    "q": 5
 }
 
 /**
- * 
+ * @author Medaturd76
+ * @description Creates the basic board
  * @returns {[CanvasRenderingContext2D, number]}
  */
 function drawBoard() {
@@ -67,6 +79,7 @@ function drawBoard() {
  * @param {CanvasRenderingContext2D} content2D
  */
 function drawPeices(content2D) {
+    console.log("Hi!");
     for (var peiceNum = 0; peiceNum < button_group.children.length; peiceNum++) {
         const peice = button_group.children[peiceNum];
         const img = new Image(150, 150) //Replace 120 with actual sizes
@@ -96,8 +109,7 @@ function drawMovement(peice, space) {
         //Queen
     } else if (type == "p") {
         //Pawn
-        //Check peice is at starting point for color. Pawn cant get back there so no need for move check
-        const color_data = peice.split("")[0] == "b" ? [-1, 7] : [1, 2];
+        const color_data = peice.split("")[0] == "b" ? [1, 2] : [-1, 7];
         const point = space.split("");
         const new_point_y = parseInt(point[1]) - 1 + color_data[0];
         content2D.beginPath();
@@ -107,7 +119,6 @@ function drawMovement(peice, space) {
         if (parseInt(point[1])==color_data[1]) {
             content2D.beginPath();
             content2D.arc(conversion[point[0]]*size+(size/2), (new_point_y + color_data[0]) * size + (size/2), size/3, 0, 2 * Math.PI, false);
-            content2D.fillStyle = "rgba(80, 80, 80, 0.5)";
             content2D.fill();
         }
     }
@@ -144,7 +155,6 @@ function ready() {
             const button = button_group.appendChild(document.createElement("button"));
             button.name = button.textContent = a;
             button.id = b;
-            button.onclick = (_) => {drawMovement(a, b);};
         }
     }
     updateBoard();
@@ -152,3 +162,4 @@ function ready() {
 
 window.addEventListener('load', ready);
 window.addEventListener('resize', updateBoard);
+window.addEventListener('click', )
