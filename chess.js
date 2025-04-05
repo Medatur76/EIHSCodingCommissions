@@ -1,4 +1,4 @@
-var canvas, button_group, indicators, size = 1;
+var canvas, peice_group, indicators, size = 1;
 const default_pcs = {
     "br": ["a1", "h1"],
     "bn": ["b1", "g1"],
@@ -22,7 +22,15 @@ const conversion = {
     "e": 4,
     "f": 5,
     "g": 6,
-    "h": 7
+    "h": 7,
+    0: "a",
+    1: "b",
+    2: "c",
+    3: "d",
+    4: "e",
+    5: "f",
+    6: "g",
+    7: "h"
 };
 
 const piece_to_int = {
@@ -34,7 +42,7 @@ const piece_to_int = {
     "b": 3,
     "k": 4,
     "q": 5
-}
+};
 
 /**
  * @author Medaturd76
@@ -79,9 +87,8 @@ function drawBoard() {
  * @param {CanvasRenderingContext2D} content2D
  */
 function drawPeices(content2D) {
-    console.log("Hi!");
-    for (var peiceNum = 0; peiceNum < button_group.children.length; peiceNum++) {
-        const peice = button_group.children[peiceNum];
+    for (var peiceNum = 0; peiceNum < peice_group.children.length; peiceNum++) {
+        const peice = peice_group.children[peiceNum];
         const img = new Image(150, 150) //Replace 120 with actual sizes
         img.src = `https://images.chesscomfiles.com/chess-themes/pieces/neo/150/${peice.name}.png`;
         const sPos = peice.id.split("");
@@ -116,6 +123,7 @@ function drawMovement(peice, space) {
         content2D.arc(conversion[point[0]]*size+(size/2), new_point_y * size + (size/2), size/3, 0, 2 * Math.PI, false);
         content2D.fillStyle = "rgba(80, 80, 80, 0.5)";
         content2D.fill();
+
         if (parseInt(point[1])==color_data[1]) {
             content2D.beginPath();
             content2D.arc(conversion[point[0]]*size+(size/2), (new_point_y + color_data[0]) * size + (size/2), size/3, 0, 2 * Math.PI, false);
@@ -127,10 +135,12 @@ function drawMovement(peice, space) {
 
 /**
  * 
- * @param {String} peice Type of peice
- * @param {String} space [letter space][number space] moving too
+ * @param {String} oldSpace 
+ * @param {String} newSpace 
  */
-function drawAnimations(peice, space) {}
+function drawAnimations(oldSpace, newSpace) {
+    //
+}
 
 function updateBoard() {
 
@@ -143,23 +153,41 @@ function updateBoard() {
     return canvas;
 }
 
+/**
+ * 
+ * @param {MouseEvent} ev 
+ */
+function clickHandler(ev) {
+    const bounds = canvas.getBoundingClientRect();
+    const clickPos = [Math.min(Math.floor((ev.x-bounds.left)/size), 7), Math.min(Math.floor((ev.y-bounds.top)/size), 7)];
+    const indicator = indicators_group.getElementsByClassName(`${conversion[clickPos[0]]} ${clickPos[1]}`)[0];
+    if (indicator == null || indicator == undefined) {
+        const peice = peice_group.getElementsByClassName(`${conversion[clickPos[0]]} ${clickPos[1]}`);
+        if (peice != null && peice != undefined) {
+            drawMovement(peice.name, `${conversion[clickPos[0]]}${clickPos[1]}`)
+        }
+    }
+
+}
+
 function ready() {
     canvas = document.body.appendChild(document.createElement('canvas'));
     canvas.id = "game";
-    button_group = document.body.appendChild(document.createElement('div'));
-    button_group.id = "peices";
+    canvas.addEventListener('click', clickHandler);
+    peice_group = document.body.appendChild(document.createElement('div'));
+    peice_group.id = "peices";
     indicators = document.body.appendChild(document.createElement('div'));
     indicators.id = "indicators";
     for (const a in default_pcs) {
         for (const b of default_pcs[a]) {
-            const button = button_group.appendChild(document.createElement("button"));
-            button.name = button.textContent = a;
-            button.id = b;
+            const button = peice_group.appendChild(document.createElement("div"));
+            button.name = a;
+            button.className = b.split("");
         }
     }
+    indicators.firstChild
     updateBoard();
 }
 
 window.addEventListener('load', ready);
 window.addEventListener('resize', updateBoard);
-window.addEventListener('click', )
