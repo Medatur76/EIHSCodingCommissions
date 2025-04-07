@@ -1,4 +1,11 @@
-var canvas, peice_group, indicators, size = 1;
+/**
+ * @type {HTMLDivElement}
+ */
+var canvas,
+/**
+ * @type {HTMLDivElement}
+ */
+    images, size = 1;
 const default_pcs = {
     "br": ["a1", "h1"],
     "bn": ["b1", "g1"],
@@ -44,17 +51,21 @@ const piece_to_int = {
     "q": 5
 };
 
+var peices = {};
+
+var indicators = {};
+
 /**
  * @author Medaturd76
  * @description Creates the basic board
- * @returns {[CanvasRenderingContext2D, number]}
+ * @returns {CanvasRenderingContext2D}
  */
 function drawBoard() {
     const content2D = canvas.getContext('2d');
     content2D.clearRect(0, 0, canvas.width, canvas.height);
     const primary = document.getElementById("c-1").value;
     const secondary = document.getElementById("c-2").value;
-    const scale = Math.min(window.innerHeight, window.innerWidth)/300;
+    const scale = Math.min(window.innerHeight, window.innerWidth)/150;
     size = 10*scale;
     canvas.width = size*8;
     canvas.height = size*8;
@@ -80,114 +91,216 @@ function drawBoard() {
         }
     }
     //Add colum and row notations
-    return [content2D, size];
+    return content2D;
 }
 
 /**
+ * @author Medaturd76
  * @param {CanvasRenderingContext2D} content2D
+ * @returns {CanvasRenderingContext2D}
+ * @description Draws all the chess peices according to the images div element
  */
 function drawPeices(content2D) {
-    for (var peiceNum = 0; peiceNum < peice_group.children.length; peiceNum++) {
-        const peice = peice_group.children[peiceNum];
-        const img = new Image(150, 150) //Replace 120 with actual sizes
-        img.src = `https://images.chesscomfiles.com/chess-themes/pieces/neo/150/${peice.name}.png`;
-        const sPos = peice.id.split("");
-        content2D.drawImage(img, conversion[sPos[0]]*size, (parseInt(sPos[1])-1)*size, size, size);
+    for (const [pos, peice] of Object.entries(peices)) {
+        const sPos = pos.split("");
+        content2D.drawImage(document.getElementById(peice), conversion[sPos[0]]*size, (parseInt(sPos[1])-1)*size, size, size);
     }
+    return content2D;
 }
 
 /**
  * 
- * @param {String} peice Type of peice
- * @param {String} space [letter space][number space]
+ * @param {String} peice Type of peice [color][type]
+ * @param {String} space Coordinate of selected peice [letter space][number space]
+ * @param {boolean} [old=false] Wether or not to keep prev indicators
+ * @param {CanvasRenderingContext2D} [content=null] If old is true then content MUST be specified
  */
-function drawMovement(peice, space) {
-    const content2D = updateBoard();
+function drawMovement(peice, space, old=false, content=null) {
+    const content2D = old ? content : updateBoard();
+    if (!old) indicators = {};
     const type = peice.split("")[1];
+    const point = space.split("");
+    content2D.fillStyle = "rgba(80, 80, 80, 0.5)";
     if (type == "r") {
-        //Rook
+        var nextTake = [conversion[conversion[point[0]]-1], parseInt(point[1])];
+        var change = [-1, 0];
+        var stillGoing = true;
+        while (stillGoing) {
+            if ((nextTake[0] == undefined) || (nextTake[1] < 1 || nextTake[1] > 8) || (peices[nextTake[0] + nextTake[1]] != null && peices[nextTake[0] + nextTake[1]] != undefined)) {
+                if ((peices[nextTake[0] + nextTake[1]] != null && peices[nextTake[0] + nextTake[1]] != undefined) && peices[nextTake[0] + nextTake[1]].split("")[0] != peice.split("")[0]) {
+                    indicators[nextTake[0] + nextTake[1]] = space;
+                    content2D.beginPath();
+                    content2D.arc(conversion[nextTake[0]]*size+(size/2), (nextTake[1]-1) * size + (size/2), size/3, 0, 2 * Math.PI, false);
+                    content2D.fill();
+                }
+                change.reverse();
+                change[0] = change[0] * -1;
+                if (change[0] == -1 && change[1] == 0) {
+                    stillGoing = false;
+                }
+                nextTake = [conversion[conversion[point[0]]+change[0]], parseInt(point[1]) + change[1]];
+            } else {
+                indicators[nextTake[0] + nextTake[1]] = space;
+                content2D.beginPath();
+                content2D.arc(conversion[nextTake[0]]*size+(size/2), (nextTake[1]-1) * size + (size/2), size/3, 0, 2 * Math.PI, false);
+                content2D.fill();
+                nextTake[0] = conversion[conversion[nextTake[0]] + change[0]];
+                nextTake[1] += change[1];
+            }
+        }
     } else if (type == "n") {
-        //Knight
+        const moves = [[-1, 2], [1, 2], [-2, 1], [2, 1], [-1, -2], [1, -2], [-2, -1], [2, -1]];
+        for (const [xc, yc] of moves) {
+            const newPoint = [conversion[conversion[point[0]] + xc], parseInt(point[1]) + yc];
+            if (((peices[newPoint[0] + newPoint[1]] != null && peices[newPoint[0] + newPoint[1]] != undefined) && peices[newPoint[0] + newPoint[1]].split("")[0] != peice.split("")[0]) || (newPoint[0] != undefined && !(newPoint[1] < 1 || newPoint[1] > 8) && (peices[newPoint[0] + newPoint[1]] == null || peices[newPoint[0] + newPoint[1]] == undefined))) {
+                indicators[newPoint[0] + newPoint[1]] = space;
+                content2D.beginPath();
+                content2D.arc(conversion[newPoint[0]]*size+(size/2), (newPoint[1]-1) * size + (size/2), size/3, 0, 2 * Math.PI, false);
+                content2D.fill();
+            }
+        }
     } else if (type == "b") {
-        //Bishup
+        var nextTake = [conversion[conversion[point[0]]+1], parseInt(point[1])+1];
+        var change = [1, 1];
+        var stillGoing = true;
+        while (stillGoing) {
+            if ((nextTake[0] == undefined) || (nextTake[1] < 1 || nextTake[1] > 8) || (peices[nextTake[0] + nextTake[1]] != null && peices[nextTake[0] + nextTake[1]] != undefined)) {
+                if ((peices[nextTake[0] + nextTake[1]] != null && peices[nextTake[0] + nextTake[1]] != undefined) && peices[nextTake[0] + nextTake[1]].split("")[0] != peice.split("")[0]) {
+                    indicators[nextTake[0] + nextTake[1]] = space;
+                    content2D.beginPath();
+                    content2D.arc(conversion[nextTake[0]]*size+(size/2), (nextTake[1]-1) * size + (size/2), size/3, 0, 2 * Math.PI, false);
+                    content2D.fill();
+                }
+                change.reverse();
+                change[0] = change[0] * -1;
+                if (change[0] == 1 && change[1] == 1) {
+                    stillGoing = false;
+                }
+                nextTake = [conversion[conversion[point[0]]+change[0]], parseInt(point[1]) + change[1]];
+            } else {
+                indicators[nextTake[0] + nextTake[1]] = space;
+                content2D.beginPath();
+                content2D.arc(conversion[nextTake[0]]*size+(size/2), (nextTake[1]-1) * size + (size/2), size/3, 0, 2 * Math.PI, false);
+                content2D.fill();
+                nextTake[0] = conversion[conversion[nextTake[0]] + change[0]];
+                nextTake[1] += change[1];
+            }
+        }
     } else if (type == "k") {
-        //King
+        const square = [[-1, 1], [0, 1], [1, 1], [-1, 0], [1, 0], [-1, -1], [0, -1], [1, -1]];
+        for (const [xc, yc] of square) {
+            const p = peices[conversion[conversion[point[0]]+xc] + (parseInt(point[1])+yc)];
+            if (((p == null || p == undefined) && (parseInt(point[1])+yc >= 1 && parseInt(point[1])+yc <= 8)) || ((p != null || p != undefined) && p.split("")[0] != peice.split("")[0])) {
+                indicators[conversion[conversion[point[0]]+xc] + (parseInt(point[1])+yc)] = space;
+                content2D.beginPath();
+                content2D.arc((conversion[point[0]]+xc)*size+(size/2), (parseInt(point[1])+yc-1) * size + (size/2), size/3, 0, 2 * Math.PI, false);
+                content2D.fill();
+            }
+        }
     } else if (type == "q") {
-        //Queen
+        drawMovement(peice.split("")[0]+"r", space, true, content2D);
+        drawMovement(peice.split("")[0]+"b", space, true, content2D);
     } else if (type == "p") {
-        //Pawn
         const color_data = peice.split("")[0] == "b" ? [1, 2] : [-1, 7];
-        const point = space.split("");
         const new_point_y = parseInt(point[1]) - 1 + color_data[0];
         content2D.beginPath();
         content2D.arc(conversion[point[0]]*size+(size/2), new_point_y * size + (size/2), size/3, 0, 2 * Math.PI, false);
-        content2D.fillStyle = "rgba(80, 80, 80, 0.5)";
         content2D.fill();
-
-        if (parseInt(point[1])==color_data[1]) {
+        indicators[point[0] + (new_point_y+1)] = space;
+        if (parseInt(point[1])==color_data[1] && (peices[point[0] + (new_point_y+1)] == null || peices[point[0] + (new_point_y+1)] == undefined)) {
             content2D.beginPath();
             content2D.arc(conversion[point[0]]*size+(size/2), (new_point_y + color_data[0]) * size + (size/2), size/3, 0, 2 * Math.PI, false);
             content2D.fill();
+            indicators[point[0] + (new_point_y + color_data[0]+1)] = space;
+        }
+        const rightTake = conversion[conversion[point[0]]+1] + (new_point_y+1);
+        if (peices[rightTake] != null && peices[rightTake] != undefined && peices[rightTake].split("")[0] != peice.split("")[0]) {
+            content2D.beginPath();
+            content2D.arc((conversion[point[0]]+1)*size+(size/2), new_point_y * size + (size/2), size/3, 0, 2 * Math.PI, false);
+            content2D.fill();
+            indicators[rightTake] = space;
+        }
+        const leftTake = conversion[conversion[point[0]]-1] + (new_point_y+1);
+        if (peices[leftTake] != null && peices[leftTake] != undefined && peices[leftTake].split("")[0] != peice.split("")[0]) {
+            content2D.beginPath();
+            content2D.arc((conversion[point[0]]-1)*size+(size/2), new_point_y * size + (size/2), size/3, 0, 2 * Math.PI, false);
+            content2D.fill();
+            indicators[leftTake] = space;
         }
     }
     content2D.beginPath();
 }
 
 /**
- * 
  * @param {String} oldSpace 
  * @param {String} newSpace 
  */
 function drawAnimations(oldSpace, newSpace) {
-    //
+    //Possiblity for cool animations to spice things up a bit?
+    //Need to add check checking
+    indicators = {};
+    const peice = peices[oldSpace];
+    delete peices[oldSpace];
+    peices[newSpace] = peice;
+    updateBoard();
 }
 
 function updateBoard() {
 
-    const data = drawBoard();
-    const canvas = data[0];
-    const size = data[1];
+    var canvas = drawBoard();
 
-    drawPeices(canvas, size);
+    canvas = drawPeices(canvas);
 
     return canvas;
 }
 
+var whiteTurn = true;
+
 /**
- * 
+ * @author Medaturd76
+ * @description Handles an input on the canvas element
  * @param {MouseEvent} ev 
  */
 function clickHandler(ev) {
     const bounds = canvas.getBoundingClientRect();
     const clickPos = [Math.min(Math.floor((ev.x-bounds.left)/size), 7), Math.min(Math.floor((ev.y-bounds.top)/size), 7)];
-    const indicator = indicators_group.getElementsByClassName(`${conversion[clickPos[0]]} ${clickPos[1]}`)[0];
+    const boardPos = `${conversion[clickPos[0]]}${clickPos[1]+1}`;
+    const indicator = indicators[boardPos];
     if (indicator == null || indicator == undefined) {
-        const peice = peice_group.getElementsByClassName(`${conversion[clickPos[0]]} ${clickPos[1]}`);
+        const peice = peices[boardPos];
         if (peice != null && peice != undefined) {
-            drawMovement(peice.name, `${conversion[clickPos[0]]}${clickPos[1]}`)
+            if ((peice.split("")[0] == "w" && whiteTurn) || (peice.split("")[0] == "b" && !whiteTurn)) drawMovement(peice, boardPos.replace(" ", ""));
         }
+    } else {
+        drawAnimations(indicator, boardPos);
+        whiteTurn = !whiteTurn;
     }
-
 }
 
 function ready() {
+    console.log("DEV LOG:\nSetting up game...");
     canvas = document.body.appendChild(document.createElement('canvas'));
     canvas.id = "game";
     canvas.addEventListener('click', clickHandler);
-    peice_group = document.body.appendChild(document.createElement('div'));
-    peice_group.id = "peices";
-    indicators = document.body.appendChild(document.createElement('div'));
-    indicators.id = "indicators";
-    for (const a in default_pcs) {
-        for (const b of default_pcs[a]) {
-            const button = peice_group.appendChild(document.createElement("div"));
-            button.name = a;
-            button.className = b.split("");
+    images = document.body.appendChild(document.createElement('div'));
+    images.className = "hidden";
+    for (const c of ["b", "w"]) {
+        for (const p of ["r", "n", "b", "q", "k", "p"]) {
+            const img = images.appendChild(document.createElement("img"));
+            img.height = img.width = 150; //Replace 150 with actual sizes
+            img.src = `https://images.chesscomfiles.com/chess-themes/pieces/neo/150/${c+p}.png`;
+            img.id = c+p;
         }
     }
-    indicators.firstChild
+    for (const a in default_pcs) {
+        for (const b of default_pcs[a]) {
+            peices[b] = a;
+        }
+    }
+    console.log("Default board elements setup!");
     updateBoard();
+    window.addEventListener('resize', updateBoard);
+    console.log("Full setup complete!");
 }
 
 window.addEventListener('load', ready);
-window.addEventListener('resize', updateBoard);

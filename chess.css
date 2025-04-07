@@ -1,3 +1,8 @@
-#peices, #indicators {
+.hidden {
     --comment: This needs to be completely hidden and non obstructive of the rest of the elements
+}
+
+#game {
+    display: flex;
+    margin: 0 auto;
 }
