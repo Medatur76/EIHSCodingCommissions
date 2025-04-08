@@ -5,11 +5,14 @@
 :root{
     font-size: 10px;
 }
-body{
-    margin-top: 100px;
-    min-height: 100vh;
-    background-color: black;
-    background-image: url(https://i.kickstarter.com/assets/033/776/868/d32f02b3fcce18171d5450c8f7cd7e95_original.png?anim=false&fit=cover&gravity=auto&height=873&origin=ugc&q=92&v=1622839941&width=1552&sig=5sanOfkxxH%2B4YT13tDWxK6RtCPHNqYRAy2DswmHNa08%3D);
-    background-repeat: no-repeat;
-    background-size: cover;
+.div-wrapper {
+    position: relative;
+    height: 300px;
+    width: 300px;
+}
+
+.div-wrapper img {
+    position: absolute;
+    left: 0;
+    bottom: 0;
 }
