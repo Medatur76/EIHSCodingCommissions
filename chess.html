@@ -3,6 +3,9 @@
     <head>
         <!--CSS and meta data-->
         <link rel="stylesheet" href="chess.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Iceland&display=swap" rel="stylesheet">
     </head>
     <body>
         <!--Front end stuff-->
@@ -10,12 +13,12 @@
         <!--@Crimmoth Please make the following tags look good-->
         <input id="c-1" type="color" value="#f2f6be" oninput="updateBoard()" />
         <input id="c-2" type="color" value="#6ecf27" oninput="updateBoard()" />
-        <input id="wf" type="button" value="Forfeit" />
-        <input id="bf" type="button" value="Forfeit" />
+        <input id="wf" type="button" value="Forfeit" onclick="forf('w')" />
+        <input id="bf" type="button" value="Forfeit" onclick="forf('b')" />
         <!--Both the id and value will change as this button needs to be pressed twice to activate. this gives a chance for some cool stuff or somethin idk-->
-        <input id="draw" type="button" value="Draw?" />
+        <input id="draw" type="button" value="Draw?" onclick="pressDraw()" />
         <!--value swtiches between start and play again-->
-        <input id="playagain" type="button" value="Start" />
+        <input id="playpaused" type="button" value="Start" onclick="paused = !paused; updateBoard();" />
         <!--Default Chess (Can be altered to fit front end style. @Medatur76)-->
         <script defer src="chess.js"></script>
         <!--Pre footer stuff-->
