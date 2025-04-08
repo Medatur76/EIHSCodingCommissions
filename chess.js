@@ -286,8 +286,17 @@ function drawAnimations(oldSpace, newSpace) {
     if (indicators[king] != undefined) {
         //Checkmate needs to be added
         const covered = indicators;
-        drawMovement(color + "k", king, )
         red = indicators[king];
+        drawMovement(color + "k", king, draw=false);
+        var mate = true;
+        if (Object.keys(indicators).length <= 1) {
+            mate = false;
+        } else { 
+            for (const [pos, _] of Object.entries(indicators)) {
+                if (covered[pos] != undefined) mate = false;
+            }
+        }
+        if (mate) console.log("Checkmate!");
         if (take != undefined) {
             peices[newSpace] = take;
         } else {
