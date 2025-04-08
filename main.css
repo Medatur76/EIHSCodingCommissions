@@ -4,15 +4,6 @@
 }
 :root{
     font-size: 10px;
-}
-.div-wrapper {
-    position: relative;
-    height: 300px;
-    width: 300px;
-}
+body{
 
-.div-wrapper img {
-    position: absolute;
-    left: 0;
-    bottom: 0;
 }
