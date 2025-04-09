@@ -1,20 +1,22 @@
 import * as THREE from 'three';
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 
-const loader = new OBJLoader();
+const loader = new FBXLoader();
 const scene = new THREE.Scene();
 
 let object;
 
-loader.load( './Chesset.obj', function ( obj ) {
+loader.load( 'chess.fbx', function ( fbx ) {
 
-    object = obj.scene
-    scene.add( obj.scene );
+    object = fbx;
+    scene.add( object );
     
   
-  }, undefined, function ( error ) {
-  
+  }, function (xhr) {
+    if (xhr.loaded / xhr.total * 100 == 100) document.body.appendChild(document.createElement("p")).textContent = "done";
+  }, function ( error ) {
     console.error( error );
+    document.body.appendChild(document.createElement("p")).textContent = error;
 
   } );
 
@@ -24,10 +26,19 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-camera.position.z = 20;
+const topLight = new THREE.DirectionalLight(0xffffff, 1);
+topLight.position.set(500,500,500)
+topLight.castShadow = true;
+scene.add(topLight);
+camera.position.z = 22.5;
+camera.position.y = 15;
+camera.rotation.x = -0.8;
+const ambientLight = new THREE.AmbientLight(0x333333, 1);
+scene.add(ambientLight);
 
 function animate() {
-    object.rotation.y += 0.01;
+
+    if (object) object.rotation.y += 0.0025;
     renderer.render( scene, camera );
 }
 renderer.setAnimationLoop( animate );
