@@ -26,11 +26,11 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-const topLight = new THREE.DirectionalLight(0xffffff, 1);
+const topLight = new THREE.DirectionalLight(0xFFD7B8, 4);
 topLight.position.set(500,500,500)
 topLight.castShadow = true;
 scene.add(topLight);
-camera.position.z = 22.5;
+camera.position.z = 22;
 camera.position.y = 15;
 camera.rotation.x = -0.8;
 const ambientLight = new THREE.AmbientLight(0x333333, 1);
@@ -38,7 +38,7 @@ scene.add(ambientLight);
 
 function animate() {
 
-    if (object) object.rotation.y += 0.0025;
+    if (object) object.rotation.y += 0.001;
     renderer.render( scene, camera );
 }
 renderer.setAnimationLoop( animate );
