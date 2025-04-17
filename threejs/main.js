@@ -8,16 +8,14 @@ const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-// ✅ Create renderer BEFORE using it
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.domElement.style.position = 'absolute';
 renderer.domElement.style.top = '0';
 renderer.domElement.style.left = '0';
 renderer.domElement.style.zIndex = '0';
-document.body.prepend(renderer.domElement); // ✅ Works now
+document.body.prepend(renderer.domElement);
 
-// ✅ Now add your navbar
 const navbar = document.createElement('div');
 navbar.innerHTML = `
   <nav class="navbar">
@@ -28,7 +26,6 @@ navbar.innerHTML = `
 `;
 document.body.appendChild(navbar);
 
-// ✅ Add CSS with .navbar fixed and styled correctly
 const style = document.createElement('style');
 style.textContent = `
 body {
@@ -67,6 +64,17 @@ document.head.appendChild(style);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
+controls.enableZoom = false; 
+controls.enableRotate = true; 
+controls.enablePan = false; 
+controls.screenSpacePanning = false; 
+
+controls.minPolarAngle = Math.PI / 2 - 0.8; 
+controls.maxPolarAngle = Math.PI / 2 - 0.8;
+
+camera.position.set(22, 15, 22);
+camera.rotation.set(-0.8, 0, 0);
+
 const topLight = new THREE.DirectionalLight(0xFFD7B8, 4);
 topLight.position.set(500, 500, 500);
 topLight.castShadow = true;
@@ -74,10 +82,6 @@ scene.add(topLight);
 
 const ambientLight = new THREE.AmbientLight(0x333333, 1);
 scene.add(ambientLight);
-
-camera.position.z = 22;
-camera.position.y = 15;
-camera.rotation.x = -0.8;
 
 let object;
 loader.load('chess.fbx', function (fbx) {
@@ -97,7 +101,7 @@ document.body.appendChild(labelRenderer.domElement);
 
 function animate() {
     requestAnimationFrame(animate);
-    controls.update();
+    controls.update(); 
     if (object) object.rotation.y += 0.001;
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
